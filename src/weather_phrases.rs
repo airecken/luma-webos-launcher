@@ -1,4 +1,4 @@
-//! Context-aware, stable Rude greeting selection. Source copy retains every approved line.
+//! Context-aware, stable weather greetings with profanity-free personal copy.
 use crate::model::Preferences;
 use crate::weather::Reading;
 use serde::{Deserialize, Serialize};
@@ -337,6 +337,22 @@ mod tests {
         assert_eq!(templates().len(), 60);
         for row in templates() {
             assert!(!row.title.is_empty() && !row.subtitle.is_empty());
+        }
+    }
+    #[test]
+    fn personal_greetings_are_profanity_free() {
+        for row in templates() {
+            let text = format!("{} {}", row.title, row.subtitle).to_lowercase();
+            for word in text.split(|ch: char| !ch.is_alphanumeric()) {
+                assert!(
+                    !["fuck", "shit", "piss", "bitch", "damn", "bastard"]
+                        .iter()
+                        .any(|root| word.contains(root))
+                        && !["hell", "ass", "balls", "crap"].contains(&word),
+                    "Profanity remains in greeting: {}",
+                    row.title
+                );
+            }
         }
     }
     #[test]

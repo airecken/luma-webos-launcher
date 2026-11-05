@@ -975,12 +975,10 @@ impl Renderer {
         let advance = |c: char| {
             if c == '\n' {
                 0.
+            } else if style.tabular_nums && c.is_ascii_digit() {
+                max_digit + tracking
             } else {
-                if style.tabular_nums && c.is_ascii_digit() {
-                    max_digit + tracking
-                } else {
-                    fonts[&choose_font(c)].metrics(c, size_f).advance_width + tracking
-                }
+                fonts[&choose_font(c)].metrics(c, size_f).advance_width + tracking
             }
         };
         let mut lines: Vec<String> = Vec::new();
@@ -1884,12 +1882,13 @@ impl Renderer {
                     && *border == 0.
                     && fill_rect == rect
                     && fill_radius == radius
-                    && tint[3] >= 0.999
-                    && let Some(source) = opaque_frost(path) =>
+                    && tint[3] >= 0.999 =>
                 {
-                    self.frost(source, *rect, *radius, *tint, Some(*fill));
-                    merged_next = true;
-                    continue;
+                    if let Some(source) = opaque_frost(path) {
+                        self.frost(source, *rect, *radius, *tint, Some(*fill));
+                        merged_next = true;
+                        continue;
+                    }
                 }
                 // An opaque full-screen photo under a black scrim: darken the
                 // photo itself instead of filling the whole screen twice.

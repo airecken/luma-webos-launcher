@@ -4,7 +4,14 @@
   "printWidth": 100,
   "trailingComma": "all",
   "sortPackageJson": false,
-  "overrides": [{ "files": ["tv/*.cjs"], "options": { "trailingComma": "none" } }],
+  "overrides": [
+    {
+      "files": ["tv/*.cjs", "extras/c9/*.js"],
+      "options": {
+        "trailingComma": "none"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/**",
     "dist/**",

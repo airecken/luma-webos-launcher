@@ -16,6 +16,11 @@ pub struct Video {
     pub id: String,
     pub category: String,
 }
+/// The C9 package uses NDL v1, which only exposes H.264 hardware playback.
+pub fn c9_video_build() -> bool {
+    matches!(option_env!("LUMA_C9_VIDEO"), Some("1"))
+}
+
 pub const ALL_SOURCES: u8 = 0b1111;
 pub const FILTERS: [(&str, &str); 5] = [
     ("All", ""),

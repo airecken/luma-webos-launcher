@@ -48,9 +48,17 @@ struct H264Tuning {
 impl Default for H264Tuning {
     fn default() -> Self {
         Self {
-            lead_ms: 250,
-            use_decode_pts: false,
-            retry_ms: 5,
+            lead_ms: if crate::video_catalog::c9_video_build() {
+                500
+            } else {
+                250
+            },
+            use_decode_pts: crate::video_catalog::c9_video_build(),
+            retry_ms: if crate::video_catalog::c9_video_build() {
+                1
+            } else {
+                5
+            },
             drop_threshold: None,
             fixed_30fps: false,
         }

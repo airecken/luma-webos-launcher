@@ -455,6 +455,25 @@ impl Preferences {
         if crate::video_catalog::selected_count(&self.video_excluded) == 0 {
             self.video_excluded.clear();
         }
+        // Do not rotate into HEVC clips unsupported by the C9 NDL v1 backend.
+        if crate::video_catalog::c9_video_build() {
+            self.video_excluded.extend(
+                catalog
+                    .iter()
+                    .filter(|video| video.source == "Amazon")
+                    .map(|video| video.id.clone()),
+            );
+            if crate::video_catalog::selected_count(&self.video_excluded) == 0
+                && let Some(video) = catalog.iter().find(|video| video.source != "Amazon")
+            {
+                self.video_excluded.remove(&video.id);
+            }
+            if !crate::video_catalog::selected(&self.video_excluded).contains(&self.video_index)
+                && let Some(index) = crate::video_catalog::selected(&self.video_excluded).first()
+            {
+                self.video_index = *index;
+            }
+        }
         self.video_sources_mask &= crate::video_catalog::ALL_SOURCES;
         if self.video_sources_mask == 0 {
             self.video_sources_mask = crate::video_catalog::ALL_SOURCES;

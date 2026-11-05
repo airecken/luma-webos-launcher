@@ -16,6 +16,8 @@ fi
 node "$ROOT/tools/webos-runtime.mjs"
 # Build the genuine Starfish exported-window bridge and compressed H.264
 # demuxer. Both work in native ARM processes, not Chromium or software RGB.
+export LUMA_NDL_API="${LUMA_NDL_API:-1}"
+if [ "$LUMA_NDL_API" = 1 ]; then export LUMA_C9_VIDEO=1; else export LUMA_C9_VIDEO=0; fi
 WEBOS_NDK="$WEBOS_NDK" sh "$ROOT/native/smp/build-hardware.sh"
 WEBOS_NDK="$WEBOS_NDK" sh "$ROOT/native/cinema/build.sh"
 export CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABI_LINKER="$CC"

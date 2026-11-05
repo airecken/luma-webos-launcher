@@ -1418,7 +1418,7 @@ fn appearance(out: &mut Scene, state: &State, assets: &Assets) {
     );
     let text_x = p.x + 32. + assets.width(lead, headline_style);
     out.text(
-        "fucking alright.",
+        "alright.",
         Rect::new(text_x, headline_y, p.w - (text_x - p.x) - 24., 44.),
         headline_style,
         if accent.use_headline {

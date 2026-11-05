@@ -1,5 +1,8 @@
 # Luma: LG webOS TV Launcher
 
+> **Personal C9 branch:** profanity-free greetings and buffered DirectMedia v1
+> hardware video wallpapers. [Build details, limitations and Home routing](docs/c9-custom.md).
+
 **A fast, remote-first launcher and home screen for LG webOS TVs, with an Apple TV feel.**
 
 Luma replaces the cluttered LG Home with one calm screen: your favorite apps, live video wallpapers, widgets, your Jellyfin library, your PC games over Moonlight and your Home Assistant devices. It's a native Rust app drawn with OpenGL ES, so it stays smooth on TV hardware.

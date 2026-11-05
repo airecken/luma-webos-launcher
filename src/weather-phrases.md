@@ -1,107 +1,103 @@
-# Rude weather phrases — одобрено Денисом 24.10 13:35 («охуенно»). Брать ВСЕ строки ниже как есть.
+# Weather greetings
 
-# Формат: Заголовок — подстрока. {N},{old},{new},{delta} — подстановки.
+## clear_nice
 
-# Подсвеченное слово заголовка: «fucking»/«fuck»/ключевое слово (oven, fridge, grey, snow...) — см. задание.
+- It's nice. — Take off your shirt but keep on your panties.
+- Sunglasses. — Time to put on my coolest shades.
+- Amazing. — So nice outside, holy schmoly.
+- Wow, it's actually nice. — Don't get used to it.
+- Suspiciously pleasant. — Something's wrong. Enjoy it anyway.
 
-## clear_nice (ясно/хорошо, 15–28 °C)
+## chilly
 
-- It's fucking nice. — Take off your shirt but keep on your panties.
-- Sun fucking glasses. — Time to put on my coolest shades.
-- Fucking amaze balls. — So fucking nice outside, holy schmoly.
-- Holy shit, it's actually nice. — Don't get used to it.
-- Suspiciously fucking pleasant. — Something's wrong. Enjoy it anyway.
+- It's getting chilly. — Unpack your space heater!
+- It's alright today. — Not amazing, but not bad either.
+- It's okay. — Look outside for more information.
+- Jacket weather. — Or freeze and be cool. Your call.
 
-## chilly (5–14 °C)
+## cold
 
-- It's getting fucking chilly. — Unpack your space heater!
-- It's fucking alright today. — Not amazeballs but also not fucking shitty.
-- It's fucking okay. — Look outside for more information.
-- Jacket fucking weather. — Or freeze and be cool. Your call.
+- Seriously cold. — Unpack your space heater!
+- Freezing cold like a fridge. — You can look outside to get more information.
+- Grow a beard. — It's freezing outside, you will need it.
+- It's whiskey time. — This will warm you up.
+- Seriously cold outside. — Keep every layer on.
 
-## cold (0–4 °C)
+## frost
 
-- Cold as fucking shit. — Unpack your space heater!
-- Freezing cold like a fucking fridge. — You can look outside to get more information.
-- Grow a fucking beard. — It's freezing outside, you will need it.
-- It's fucking whiskey time. — This will warm you up.
-- Balls-out fucking cold. — Except don't. They'll fall off.
+- Below zero. — It's freezing right now.
+- Hypothermic. — Can't feel my fingers any more.
+- North pole. — Nothing against the north pole, but seriously!
+- Frozen fingers. — Can't feel my fingers any more.
+- Forget this, I'm hibernating. — Wake me up in April.
 
-## frost (ниже 0 °C)
+## hot
 
-- Below fucking zero. — It's fucking freezing right now.
-- Hypo fucking thermic. — Can't feel my fingers any more.
-- North fucking pole. — Nothing against the north pole, but seriously!
-- Frozen fucking fingers. — Can't feel my fingers any more.
-- Fuck this, I'm hibernating. — Wake me up in April.
-
-## hot (25 °C+)
-
-- It's like a fucking oven. — Just get naked, now. And get some ice cream.
-- I'm fucking melting. — Take off your shirt and get wet.
-- It's stupid hot. — Even fucking Siri has no answer for you today.
-- Global fucking warming. — Yeah, let's blame Global Warming.
+- It's like an oven. — Just get naked, now. And get some ice cream.
+- I'm melting. — Take off your shirt and get wet.
+- It's stupid hot. — Even Siri has no answer for you today.
+- Global warming. — Yeah, let's blame Global Warming.
 - Satan called. — He wants his weather back.
-- Hot as balls. — Stay inside, hug the AC.
+- Seriously hot. — Stay inside, hug the AC.
 
 ## cloudy
 
-- It's just fucking grey. — Just clouds & no love, but computer games.
-- Fifty fucking shades of grey. — Grey clouds everywhere.
+- It's just grey. — Just clouds & no love, but computer games.
+- Fifty shades of grey. — Grey clouds everywhere.
 - Meh... Just stay in bed. — Perfect day for the couch.
 - Cloudy with a chance of... — You thought I'd say meatballs, right? Stupid.
-- Grey as my fucking soul. — Perfect TV weather, though.
+- Grey as my soul. — Perfect TV weather, though.
 
 ## rain
 
-- It's fucking raining. — You can look outside to get more information.
-- Get your fucking umbrella. — Shitloads of rain is awaiting you.
-- Wet as fuck. — Nature's shower, free of charge.
-- The sky is pissing on us. — Again.
-- Rain. Fucking rain. — Stay in. Watch shit.
+- It's raining. — You can look outside to get more information.
+- Get your umbrella. — Loads of rain await you.
+- Soaked. — Nature's shower, free of charge.
+- The sky is soaking us. — Again.
+- Rain. More rain. — Stay in. Watch TV.
 
 ## thunder
 
-- Fucking thunder storm. — Time to sing the "Fuck you, thunder" song.
-- It's getting fucking dark. — The storm is coming.
-- Zeus is fucking pissed. — Unplug your shit.
+- Thunderstorm. — Time to sing the thunder song.
+- It's getting dark. — The storm is coming.
+- Zeus is angry. — Unplug your devices.
 
-## snow (снег и мокрый снег)
+## snow
 
-- Holy fucking snow. — Still not ready for building that fucking snow castle.
-- Can't see because fucking snow. — Try looking outside for more information.
-- Are you freezing fucking serious? — You can't look outside because of fucking snow.
-- It's fucking skiing time. — Snow everywhere, yay!
-- Snow. Fucking great. — Shovel's in the garage, champ.
+- So much snow. — Still not ready to build that snow castle.
+- Can't see through the snow. — Try looking outside for more information.
+- Are you freezing serious? — You can't look outside because of snow.
+- It's skiing time. — Snow everywhere, yay!
+- Snow. Great. — Shovel's in the garage, champ.
 
 ## wind
 
-- It's fucking windy. — It's getting cold outside!
-- Blowing like a motherfucker. — Hold on to your hat. And your dog.
-- Wind from fucking hell. — Your umbrella is already dead.
+- It's windy. — It's getting cold outside!
+- Blowing up a storm. — Hold on to your hat. And your dog.
+- Wild wind. — Your umbrella is already dead.
 
 ## fog
 
-- It's fucking foggy. — Can't see shit.
-- Silent fucking Hill. — Don't go outside. Seriously.
-- Can't see shit. — Fog. Thick-ass fog.
+- It's foggy. — Can't see a thing.
+- Silent Hill. — Don't go outside. Seriously.
+- Can't see a thing. — Fog. Really thick fog.
 
-## night (поздний вечер/ночь, без осадков)
+## night
 
-- It's fucking late. — Go to bed. The weather will still be shit tomorrow.
-- Dark as fuck outside. — Good night to stay in.
+- It's late. — Go to bed. The weather will still be bad tomorrow.
+- Pitch dark outside. — Good night to stay in.
 - Night. Cold. Whatever. — One more episode?
 
-## still (та же категория держится 2+ дня подряд)
+## still
 
-- Still fucking cold. — Day {N}. Still not spring.
-- Still fucking raining. — Day {N}. Build an ark.
-- Still fucking grey. — The sun is a myth.
-- Still hot as balls. — Day {N}. The AC is your only friend.
+- Still cold. — Day {N}. Still not spring.
+- Still raining. — Day {N}. Build an ark.
+- Still grey. — The sun is a myth.
+- Still seriously hot. — Day {N}. The AC is your only friend.
 
-## change (резкая смена: категория сменилась или Δt ≥ 6 °C за ~3 ч)
+## change
 
-- What the fuck, weather? — Was {old} an hour ago.
-- Fucking plot twist. — {old} → {new}.
-- Bipolar fucking weather. — Dress for everything.
-- It got fucking colder. — {delta}° down since this morning.
+- What happened, weather? — Was {old} an hour ago.
+- Plot twist. — {old} → {new}.
+- Unpredictable weather. — Dress for everything.
+- It got colder. — {delta}° down since this morning.

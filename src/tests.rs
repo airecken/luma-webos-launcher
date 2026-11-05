@@ -3460,3 +3460,27 @@ fn unsupported_saved_media_source_is_ignored_without_losing_other_settings() {
     assert_eq!(prefs.stacks[0].collection, "recent");
     assert!(prefs.luma_player);
 }
+
+#[test]
+fn c9_profile_recovers_from_a_hevc_only_saved_selection() {
+    if !crate::video_catalog::c9_video_build() {
+        return;
+    }
+    let catalog = crate::video_catalog::all();
+    let mut prefs = crate::model::Preferences {
+        video_excluded: catalog
+            .iter()
+            .filter(|v| v.source != "Amazon")
+            .map(|v| v.id.clone())
+            .collect(),
+        video_index: catalog.iter().position(|v| v.source == "Amazon").unwrap(),
+        greeting_name: "Preserved".into(),
+        ..Default::default()
+    };
+    prefs.sanitize();
+    let selected = crate::video_catalog::selected(&prefs.video_excluded);
+    assert!(!selected.is_empty());
+    assert!(selected.contains(&prefs.video_index));
+    assert!(selected.iter().all(|&i| catalog[i].source != "Amazon"));
+    assert_eq!(prefs.greeting_name, "Preserved");
+}
