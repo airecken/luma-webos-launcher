@@ -79,3 +79,7 @@ bool smp_player_ended(smp_player *player);
 
 /* Set if the pipeline reported an error; the sample should stop feeding and tear down. */
 bool smp_player_errored(smp_player *player);
+
+/* Actual pipeline callbacks, not submitted-buffer counts. */
+int64_t smp_player_frames_rendered(smp_player *player);
+int64_t smp_player_frames_dropped(smp_player *player);

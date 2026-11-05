@@ -7,22 +7,25 @@ LG C9 running webOS 4. It retains the upstream MIT license and attribution.
 
 - All 60 weather greetings and their subtitles are profanity-free. The appearance
   settings preview is also cleaned. Standard localized greetings remain intact.
-- A DirectMedia **v1** H.264 hardware-video adapter replaces the newer v2 adapter
-  when building the default C9 package. No software video decoding is used.
-- A bounded compressed-video queue (60 packets, at most 16 MiB queued) schedules
-  submissions from the monotonic decode timeline with a 200 ms startup buffer.
-  Pacing diagnostics rotate at 1 MiB. The queue is released when playback stops.
-- C9 builds use a 500 ms compressed-stream lead, decode timestamps, and a 1 ms
-  retry interval. An existing local video-tuning.json can override these defaults.
+- The default C9 background uses StarfishMediaAPIs with the webOS 4 ACB video
+  plane. Hardware decoding and LG's playback clock run behind Luma's transparent
+  interface. The source is demuxed without software decoding or RGB copies.
+- Source presentation timestamps are preserved, including reordered B-frames.
+  One second of compressed video is fed ahead to absorb network/thread jitter;
+  the pipeline controls display timing. Actual EOS drains the queued tail before
+  the next clip starts. ACB is finalized when playback stops.
+- The older buffered DirectMedia v1 adapter remains available with LUMA_NDL_API=1.
+  It keeps its prior decode-timestamp timing and bounded packet queue. Its local
+  video-tuning.json settings do not override the clocked backend's PTS schedule.
 - Manual full-screen wallpaper and the automatic idle screensaver hand off to
   com.airecken.luma.wallpaper, a small ES5 web app using LG's normal clocked
-  hardware-video pipeline. Home keeps the buffered NDL v1 background path.
-  The user confirmed the full-screen path is smooth and slightly smoother than
-  the background. The earlier transparent-surface VSync experiment is replaced.
+  hardware-video pipeline. Home uses the clocked SMP/ACB background path.
+  The user confirmed both paths are smooth. The earlier transparent-surface
+  VSync experiment is replaced.
 - The full-screen app receives only the selected public catalog clips and shuffle
   setting. It advances through the selection, stays muted, pauses when hidden,
   and returns to Luma on a key, click or wheel input. Playback errors return Home.
-  Luma stops NDL before handoff and restores its normal Home UI on return.
+  Luma stops its background decoder before handoff and restores its normal Home UI on return.
 - Amazon HEVC clips are excluded when C9 preferences are sanitized. The adapter
   cannot play those clips; Apple and community H.264 collections remain available.
 - Existing app identity com.denisefremov.luma is retained. The companion player
@@ -44,8 +47,9 @@ from dist. The separate com.denisefremov.luma.player package is still needed onl
 for integrated Plex/Jellyfin playback. Packaging and the Homebrew feed include all
 three; the deployment script installs the wallpaper helper before the launcher.
 
-The personal branch defaults to LUMA_NDL_API=1. For an explicit upstream-style
-DirectMedia v2 build instead, set LUMA_NDL_API=2 before packaging.
+The personal branch defaults to LUMA_NDL_API=smp-c9. For the older buffered
+C9 backend, set LUMA_NDL_API=1. For an explicit upstream-style DirectMedia v2
+build instead, set LUMA_NDL_API=2 before packaging.
 
 ## Home button and Gallery
 
@@ -84,3 +88,10 @@ the C9. These wallpaper changes do not expand movie codec or HDR support.
 Upstream updates can overwrite local modifications unless this branch is rebuilt.
 No personal preferences, credentials, LAN addresses, SSH keys, or TV backups are
 included in the repository.
+
+The clocked Home background was visually confirmed smooth on the C9. Remote-key
+checks verified two clip changes, full-screen handoff, and returning to clocked
+Home playback. Sustained feed diagnostics reported no submission errors or
+retries. The pipeline frame callbacks are sampled notifications; their count is
+not a measurement of display FPS. Host native tests exercise delayed load
+completion, ACB state ordering, B-frame PTS, backpressure, EOS and cleanup.

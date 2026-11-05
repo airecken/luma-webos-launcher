@@ -39,7 +39,7 @@
     "version:release": "changeset version && pnpm version:sync && oxfmt --write CHANGELOG.md",
     "version:sync": "node tools/sync-version.mjs",
     "version:check": "node tools/sync-version.mjs --check",
-    "test:wallpaper": "node --test tests/wallpaper.test.mjs"
+    "test:wallpaper": "node --test tests/wallpaper.test.mjs tests/c9-clocked.test.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",

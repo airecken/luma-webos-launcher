@@ -1,6 +1,6 @@
-//! Zero-RGB-copy hardware wallpaper for rooted webOS 5+ LG TVs.
-//! Online H.264 is demuxed, not decoded by the CPU; Starfish renders into an
-//! exported SDL video plane underneath Luma's transparent GLES foreground.
+//! Zero-RGB-copy hardware wallpaper for rooted LG TVs.
+//! Online H.264 is demuxed, not decoded by the CPU; the C9 SMP/ACB backend
+//! and newer-TV backend render underneath Luma's transparent GLES foreground.
 //! The code never downloads all 289 files or caches the entire video collection.
 #![cfg(all(feature = "webos", target_os = "linux", target_arch = "arm"))]
 use std::{
@@ -19,6 +19,7 @@ use std::{
 type Open = unsafe extern "C" fn(*const c_char, c_int, c_int, *const c_char) -> *mut c_void;
 type Feed = unsafe extern "C" fn(*mut c_void, *const c_void, usize, i64) -> c_int;
 type Close = unsafe extern "C" fn(*mut c_void);
+type Eos = unsafe extern "C" fn(*mut c_void);
 type Ended = unsafe extern "C" fn(*mut c_void) -> c_int;
 type Rendered = unsafe extern "C" fn(*mut c_void) -> i64;
 type SetDrop = unsafe extern "C" fn(*mut c_void, c_int) -> c_int;
@@ -145,6 +146,8 @@ pub struct Player {
     feed: Feed,
     close: Close,
     ended: Ended,
+    clocked: bool,
+    eos: Option<Eos>,
     rendered: Rendered,
     metrics: Metrics,
     set_drop: SetDrop,
@@ -229,8 +232,15 @@ impl Player {
                 return Err(e);
             }
         };
+        // Older NDL helpers lack these optional symbols and keep their prior timing.
+        let clocked = unsafe { function(lib, "luma_hw_clocked") }.is_ok();
+        let eos = unsafe { function(lib, "luma_hw_eos") }
+            .ok()
+            .map(|f| unsafe { std::mem::transmute::<*mut c_void, Eos>(f) });
         Ok(Self {
             lib,
+            clocked,
+            eos,
             open,
             feed,
             close,
@@ -435,11 +445,17 @@ impl Player {
             "H264"
         };
         let codec_c = CString::new(codec).unwrap();
-        let tuning = if codec == "H264" {
+        let mut tuning = if codec == "H264" {
             H264Tuning::load()
         } else {
             H264Tuning::default()
         };
+        if self.clocked {
+            // SMP receives the original display PTS (including B-frame reorder).
+            // Feed ahead; its own clock controls presentation, not packet arrival.
+            tuning.use_decode_pts = false;
+            tuning.lead_ms = 1000;
+        }
         let handle = unsafe { (self.open)(app.as_ptr(), 1920, 1080, codec_c.as_ptr()) };
         if handle.is_null() {
             if let Some(mut child) = cached {
@@ -473,6 +489,8 @@ impl Player {
         let ready = Arc::clone(&self.ready);
         let feed = self.feed;
         let metrics = self.metrics;
+        let eos = self.eos;
+        let ended = self.ended;
         let metric_source = CString::new(entry.source.clone()).unwrap();
         let metric_codec = codec_c;
         let handle = handle as usize;
@@ -610,6 +628,19 @@ impl Player {
                         lateness_max = 0.0;
                         max_au = 0;
                     }
+                }
+            }
+            if let Some(eos) = eos
+                && !stopping.load(Ordering::Relaxed)
+            {
+                unsafe { eos(handle as *mut c_void) };
+                // Preserve the queued tail; rotation follows actual pipeline EOS.
+                let drain = Instant::now();
+                while !stopping.load(Ordering::Relaxed)
+                    && drain.elapsed() < Duration::from_secs(4)
+                    && unsafe { ended(handle as *mut c_void) } == 0
+                {
+                    thread::sleep(Duration::from_millis(20));
                 }
             }
             finished.store(true, Ordering::Relaxed);

@@ -33,6 +33,7 @@ struct smp_player {
     bool playing;
     int64_t start_ns;
     int64_t frames_rendered;
+    int64_t frames_dropped;
 };
 
 static void plane_noop_post_load(void *self, const smp_load_params *params) {
@@ -269,6 +270,19 @@ bool smp_player_errored(smp_player *player) {
     return errored;
 }
 
+int64_t smp_player_frames_rendered(smp_player *player) {
+    pthread_mutex_lock(&player->lock);
+    int64_t n = player->frames_rendered;
+    pthread_mutex_unlock(&player->lock);
+    return n;
+}
+int64_t smp_player_frames_dropped(smp_player *player) {
+    pthread_mutex_lock(&player->lock);
+    int64_t n = player->frames_dropped;
+    pthread_mutex_unlock(&player->lock);
+    return n;
+}
+
 static void load_callback(int type, int64_t num_value, const char *str_value, void *user) {
     smp_player *player = user;
 
@@ -365,6 +379,9 @@ static void load_callback(int type, int64_t num_value, const char *str_value, vo
              * synchronous and therefore actionable; this event is not. */
             break;
         case SMP_EVENT_DROPPED_FRAME:
+            pthread_mutex_lock(&player->lock);
+            player->frames_dropped++;
+            pthread_mutex_unlock(&player->lock);
             fprintf(stderr, "[smp] dropped frame\n");
             break;
         default:
