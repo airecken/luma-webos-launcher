@@ -14,6 +14,12 @@ LG C9 running webOS 4. It retains the upstream MIT license and attribution.
   Pacing diagnostics rotate at 1 MiB. The queue is released when playback stops.
 - C9 builds use a 500 ms compressed-stream lead, decode timestamps, and a 1 ms
   retry interval. An existing local video-tuning.json can override these defaults.
+- Manual full-screen wallpaper and the automatic idle screensaver keep the
+  transparent Wayland surface refreshing at VSync on C9. The decoder still runs
+  on its separate hardware plane. On-TV measurements reported 59–60 surface
+  swaps per second, with video feed continuing at roughly 30 fps without retries.
+  A small c9-compositor.txt diagnostic records the surface refresh rate. Visual
+  confirmation of the remaining full-screen stutter improvement is pending.
 - Amazon HEVC clips are excluded when C9 preferences are sanitized. The adapter
   cannot play those clips; Apple and community H.264 collections remain available.
 - Existing app identity com.denisefremov.luma is retained. The companion player

@@ -2463,6 +2463,7 @@ fn run() -> Result<(), String> {
     let mut last_frame = Instant::now();
     let mut last_sky_frame = Instant::now();
     let mut last_art_frame = Instant::now();
+    let mut c9_compositor_sample = (Instant::now(), 0usize);
     let mut last_minute = None;
     let mut frame = 0u64;
     let mut visible = true;
@@ -3722,6 +3723,20 @@ fn run() -> Result<(), String> {
             && state.page == state::Page::Settings
             && state.settings_art_live
             && !state.preferences.reduced_motion;
+        // NDL v1 presents on a separate video plane. Keep the transparent
+        // Wayland surface ticking at VSync while the Home UI is cleared away,
+        // instead of letting the decorative sky's 33 ms timer pace full-screen
+        // video composition. The decoder remains independently buffered.
+        let c9_video_refresh = webos
+            && crate::video_catalog::c9_video_build()
+            && visible
+            && state.page == state::Page::Home
+            && state.preferences.background == "video"
+            && state.video_frame_ready
+            && state.ambient_on();
+        if c9_video_refresh {
+            state.dirty = true;
+        }
         if art_running && last_art_frame.elapsed() >= Duration::from_millis(15) {
             last_art_frame = Instant::now();
             state.dirty = true;
@@ -3947,6 +3962,20 @@ fn run() -> Result<(), String> {
                     }
                 }
                 presented += 1;
+                if c9_video_refresh && c9_compositor_sample.0.elapsed() >= Duration::from_secs(2) {
+                    let elapsed = c9_compositor_sample.0.elapsed().as_secs_f64();
+                    let swaps = presented - c9_compositor_sample.1;
+                    let _ = std::fs::write(
+                        "/media/developer/com.denisefremov.luma/c9-compositor.txt",
+                        format!(
+                            "ambient=true swaps_per_second={:.2}\n",
+                            swaps as f64 / elapsed
+                        ),
+                    );
+                    c9_compositor_sample = (Instant::now(), presented);
+                } else if !c9_video_refresh {
+                    c9_compositor_sample = (Instant::now(), presented);
+                }
                 if let Some(limit) = prof_slow {
                     let now = Instant::now();
                     if let Some(previous) = slow_at {
@@ -4002,6 +4031,7 @@ fn run() -> Result<(), String> {
             || state.animating()
             || edge_moving
             || options.profile_frames.is_some()
+            || c9_video_refresh
         {
             0
         } else if art_running {

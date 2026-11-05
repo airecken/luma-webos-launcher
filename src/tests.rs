@@ -3484,3 +3484,26 @@ fn c9_profile_recovers_from_a_hevc_only_saved_selection() {
     assert!(selected.iter().all(|&i| catalog[i].source != "Amazon"));
     assert_eq!(prefs.greeting_name, "Preserved");
 }
+
+#[test]
+fn automatic_and_manual_screensavers_share_ambient_mode() {
+    let mut manual = ready();
+    manual.page = Page::Home;
+    manual.focus = Target::VideoTitle;
+    manual.activate();
+    assert!(manual.ambient_on());
+
+    let mut automatic = ready();
+    automatic.page = Page::Home;
+    automatic.preferences.screensaver_minutes = 5;
+    automatic.last_input = std::time::Instant::now() - std::time::Duration::from_secs(301);
+    automatic.tick();
+    assert!(automatic.ambient_on());
+
+    let mut apps = ready();
+    apps.page = Page::Apps;
+    apps.preferences.screensaver_minutes = 5;
+    apps.last_input = std::time::Instant::now() - std::time::Duration::from_secs(301);
+    apps.tick();
+    assert!(!apps.ambient_on());
+}
