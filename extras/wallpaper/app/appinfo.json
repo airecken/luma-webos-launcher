@@ -1,0 +1,15 @@
+{
+  "id": "com.airecken.luma.wallpaper",
+  "version": "0.0.1",
+  "vendor": "Luma C9",
+  "type": "web",
+  "main": "index.html",
+  "title": "Luma Wallpaper",
+  "icon": "icon.png",
+  "resolution": "1920x1080",
+  "transparent": false,
+  "visible": false,
+  "handlesRelaunch": true,
+  "disableBackHistoryAPI": true,
+  "requiredACG": []
+}

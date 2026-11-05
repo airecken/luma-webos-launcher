@@ -1,7 +1,8 @@
 # Luma: LG webOS TV Launcher
 
 > **Personal C9 branch:** profanity-free greetings and buffered DirectMedia v1
-> hardware video wallpapers. [Build details, limitations and Home routing](docs/c9-custom.md).
+> hardware video backgrounds plus a clocked full-screen screensaver.
+> [Build details, companion installation and Home routing](docs/c9-custom.md).
 
 **A fast, remote-first launcher and home screen for LG webOS TVs, with an Apple TV feel.**
 

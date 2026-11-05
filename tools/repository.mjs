@@ -14,7 +14,7 @@ const requestedTag =
 if (requestedTag && requestedTag !== tag)
   throw new Error(`Release tag must be ${tag}, matching the packaged app version.`);
 
-const repository = process.env.GITHUB_REPOSITORY || 'funnymataleao/luma-webos-launcher';
+const repository = process.env.GITHUB_REPOSITORY || 'airecken/luma-webos-launcher';
 if (!/^[\w.-]+\/[\w.-]+$/.test(repository)) throw new Error('Invalid GitHub repository name.');
 const sourceUrl = `https://github.com/${repository}`;
 const releaseUrl = `${sourceUrl}/releases/latest/download`;
@@ -82,6 +82,38 @@ const feed = {
     },
   ],
 };
+const wallpaper = JSON.parse(
+  await fs.readFile(path.join(root, 'extras/wallpaper/app/appinfo.json'), 'utf8'),
+);
+const wallpaperFilename = `${wallpaper.id}_${wallpaper.version}_all.ipk`;
+const wallpaperBytes = await fs.readFile(path.join(output, wallpaperFilename));
+const wallpaperManifest = {
+  id: wallpaper.id,
+  version: wallpaper.version,
+  type: wallpaper.type,
+  title: wallpaper.title,
+  appDescription:
+    'Clocked full-screen video wallpapers and idle screensaver for the personal C9 build.',
+  iconUri: `https://raw.githubusercontent.com/${repository}/c9-custom/extras/wallpaper/app/icon.png`,
+  sourceUrl,
+  rootRequired: false,
+  ipkUrl: `${releaseUrl}/${wallpaperFilename}`,
+  ipkHash: { sha256: createHash('sha256').update(wallpaperBytes).digest('hex') },
+  ipkSize: wallpaperBytes.length,
+};
+feed.packages.push({
+  id: wallpaper.id,
+  title: wallpaper.title,
+  shortDescription: wallpaperManifest.appDescription,
+  fullDescriptionUrl: `${releaseUrl}/${descriptionFilename}`,
+  iconUri: wallpaperManifest.iconUri,
+  manifest: wallpaperManifest,
+});
+feed.paging.count = feed.paging.itemsTotal = feed.packages.length;
+await fs.writeFile(
+  path.join(output, `${wallpaper.id}.manifest.json`),
+  JSON.stringify(wallpaperManifest, null, 2) + '\n',
+);
 await fs.writeFile(
   path.join(output, `${player.id}.manifest.json`),
   JSON.stringify(playerManifest, null, 2) + '\n',

@@ -11,7 +11,6 @@ pub struct Video {
     pub name: String,
     pub source: String,
     /// Streamed by the hardware wallpaper on the TV.
-    #[cfg(any(test, all(feature = "webos", target_os = "linux", target_arch = "arm")))]
     pub url: String,
     pub id: String,
     pub category: String,

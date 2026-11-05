@@ -14,12 +14,15 @@ LG C9 running webOS 4. It retains the upstream MIT license and attribution.
   Pacing diagnostics rotate at 1 MiB. The queue is released when playback stops.
 - C9 builds use a 500 ms compressed-stream lead, decode timestamps, and a 1 ms
   retry interval. An existing local video-tuning.json can override these defaults.
-- Manual full-screen wallpaper and the automatic idle screensaver keep the
-  transparent Wayland surface refreshing at VSync on C9. The decoder still runs
-  on its separate hardware plane. On-TV measurements reported 59–60 surface
-  swaps per second, with video feed continuing at roughly 30 fps without retries.
-  A small c9-compositor.txt diagnostic records the surface refresh rate. Visual
-  confirmation of the remaining full-screen stutter improvement is pending.
+- Manual full-screen wallpaper and the automatic idle screensaver hand off to
+  com.airecken.luma.wallpaper, a small ES5 web app using LG's normal clocked
+  hardware-video pipeline. Home keeps the buffered NDL v1 background path.
+  The user confirmed the full-screen path is smooth and slightly smoother than
+  the background. The earlier transparent-surface VSync experiment is replaced.
+- The full-screen app receives only the selected public catalog clips and shuffle
+  setting. It advances through the selection, stays muted, pauses when hidden,
+  and returns to Luma on a key, click or wheel input. Playback errors return Home.
+  Luma stops NDL before handoff and restores its normal Home UI on return.
 - Amazon HEVC clips are excluded when C9 preferences are sanitized. The adapter
   cannot play those clips; Apple and community H.264 collections remain available.
 - Existing app identity com.denisefremov.luma is retained. The companion player
@@ -35,6 +38,11 @@ Follow the upstream SDK and dependency setup in README.md, then run:
 export WEBOS_NDK="$PWD/.build/toolchain/arm-webos-linux-gnueabi_sdk-buildroot"
 pnpm run package
 ```
+
+Install the native launcher IPK and com.airecken.luma.wallpaper_0.0.1_all.ipk
+from dist. The separate com.denisefremov.luma.player package is still needed only
+for integrated Plex/Jellyfin playback. Packaging and the Homebrew feed include all
+three; the deployment script installs the wallpaper helper before the launcher.
 
 The personal branch defaults to LUMA_NDL_API=1. For an explicit upstream-style
 DirectMedia v2 build instead, set LUMA_NDL_API=2 before packaging.
@@ -65,6 +73,11 @@ Hardware frame-completion counters increased, two screen captures showed visible
 full-screen motion, and a sustained timing sample reported no feed errors or
 retries. The user confirmed playback was smoother after buffering was added.
 Home routing was verified from the old Luma and HDMI; Gallery routing was checked.
+The full-screen handoff was verified on the C9 with all 177 selected clips in its
+payload, an advancing native media clock, actual end-of-clip rotation, remote-key
+return to the restored Home UI, and a second successful handoff. Tests cover both
+manual and automatic idle activation of the same ambient state, URL validation,
+muted playlist behavior, hidden-app pause and playback-error return to Home.
 
 The Plex companion player has not been validated for parity with native Plex on
 the C9. These wallpaper changes do not expand movie codec or HDR support.

@@ -15,6 +15,7 @@ mod model;
 mod moonlight;
 mod motion;
 mod music;
+mod native_wallpaper;
 mod pad_watch;
 mod phone_link;
 mod platform;
@@ -2463,7 +2464,8 @@ fn run() -> Result<(), String> {
     let mut last_frame = Instant::now();
     let mut last_sky_frame = Instant::now();
     let mut last_art_frame = Instant::now();
-    let mut c9_compositor_sample = (Instant::now(), 0usize);
+    let mut external_wallpaper: Option<Instant> = None;
+    let mut wallpaper_was_hidden = false;
     let mut last_minute = None;
     let mut frame = 0u64;
     let mut visible = true;
@@ -2558,6 +2560,35 @@ fn run() -> Result<(), String> {
             hw_wallpaper::log_transition_event(state.preferences.video_index, "crossfade_end");
         }
         state.tick();
+        // Use LG's clocked movie pipeline for clean C9 full-screen playback.
+        // Home's low-latency NDL background is stopped before handing over.
+        if webos
+            && video_catalog::c9_video_build()
+            && visible
+            && external_wallpaper.is_none()
+            && state.page == state::Page::Home
+            && state.preferences.background == "video"
+            && state.ambient_on()
+            && !state.animating()
+            && let Some(params) = native_wallpaper::launch_params(&state.preferences)
+        {
+            if let Some(player) = aerial_player.as_mut() {
+                player.stop();
+            }
+            state.video_frame_ready = false;
+            external_wallpaper = Some(Instant::now());
+            wallpaper_was_hidden = false;
+            platform.send(Request::Wallpaper(params));
+        }
+        if visible
+            && external_wallpaper.is_some_and(|started| started.elapsed() > Duration::from_secs(8))
+            && !wallpaper_was_hidden
+        {
+            external_wallpaper = None;
+            state.leave_ambient();
+            state.last_input = Instant::now();
+            state.notify("Wallpaper player could not open");
+        }
         // One call per frame: it marks the id as fetched, so a second call
         // for another service would never see it.
         if let Some(id) = state.movie_prefetch() {
@@ -2600,6 +2631,7 @@ fn run() -> Result<(), String> {
         let mut video_swap_pending = false;
         if let Some(player) = aerial_player.as_mut() {
             let enabled = visible
+                && external_wallpaper.is_none()
                 && presented > 0
                 && Instant::now() >= video_init_after
                 && state.preferences.background == "video"
@@ -2791,6 +2823,15 @@ fn run() -> Result<(), String> {
                         }
                     }
                     state.dirty = true;
+                }
+                Response::WallpaperLaunched(result) => {
+                    if result.is_err() {
+                        external_wallpaper = None;
+                        wallpaper_was_hidden = false;
+                        state.leave_ambient();
+                        state.last_input = Instant::now();
+                        state.notify("Install Luma Wallpaper for full-screen playback");
+                    }
                 }
                 Response::Launched(result) => {
                     state.launching = false;
@@ -3086,6 +3127,7 @@ fn run() -> Result<(), String> {
                 } if window_id == window.id() => match win_event {
                     WindowEvent::Hidden | WindowEvent::Minimized => {
                         visible = false;
+                        wallpaper_was_hidden |= external_wallpaper.is_some();
                         press = None;
                         drag = None;
                         if matches!(state.overlay, Some(Overlay::SystemKeyboard)) {
@@ -3096,6 +3138,13 @@ fn run() -> Result<(), String> {
                     WindowEvent::FocusLost => press = None,
                     WindowEvent::Shown | WindowEvent::Restored | WindowEvent::FocusGained => {
                         visible = true;
+                        if external_wallpaper.is_some() && wallpaper_was_hidden {
+                            external_wallpaper = None;
+                            wallpaper_was_hidden = false;
+                            state.leave_ambient();
+                            state.last_input = Instant::now();
+                            platform.send(Request::CloseApp(native_wallpaper::APP_ID.into()));
+                        }
                         state.dirty = true;
                         // Double Start+Select on a TV gamepad (pad_watch): close the game.
                         let quit = std::fs::remove_file(pad_watch::FLAG).is_ok();
@@ -3723,20 +3772,6 @@ fn run() -> Result<(), String> {
             && state.page == state::Page::Settings
             && state.settings_art_live
             && !state.preferences.reduced_motion;
-        // NDL v1 presents on a separate video plane. Keep the transparent
-        // Wayland surface ticking at VSync while the Home UI is cleared away,
-        // instead of letting the decorative sky's 33 ms timer pace full-screen
-        // video composition. The decoder remains independently buffered.
-        let c9_video_refresh = webos
-            && crate::video_catalog::c9_video_build()
-            && visible
-            && state.page == state::Page::Home
-            && state.preferences.background == "video"
-            && state.video_frame_ready
-            && state.ambient_on();
-        if c9_video_refresh {
-            state.dirty = true;
-        }
         if art_running && last_art_frame.elapsed() >= Duration::from_millis(15) {
             last_art_frame = Instant::now();
             state.dirty = true;
@@ -3962,20 +3997,6 @@ fn run() -> Result<(), String> {
                     }
                 }
                 presented += 1;
-                if c9_video_refresh && c9_compositor_sample.0.elapsed() >= Duration::from_secs(2) {
-                    let elapsed = c9_compositor_sample.0.elapsed().as_secs_f64();
-                    let swaps = presented - c9_compositor_sample.1;
-                    let _ = std::fs::write(
-                        "/media/developer/com.denisefremov.luma/c9-compositor.txt",
-                        format!(
-                            "ambient=true swaps_per_second={:.2}\n",
-                            swaps as f64 / elapsed
-                        ),
-                    );
-                    c9_compositor_sample = (Instant::now(), presented);
-                } else if !c9_video_refresh {
-                    c9_compositor_sample = (Instant::now(), presented);
-                }
                 if let Some(limit) = prof_slow {
                     let now = Instant::now();
                     if let Some(previous) = slow_at {
@@ -4031,7 +4052,6 @@ fn run() -> Result<(), String> {
             || state.animating()
             || edge_moving
             || options.profile_frames.is_some()
-            || c9_video_refresh
         {
             0
         } else if art_running {

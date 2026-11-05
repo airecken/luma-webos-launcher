@@ -8,7 +8,14 @@ const device = deviceIndex >= 0 ? process.argv[deviceIndex + 1] : 'tv';
 if (!device || !/^[a-zA-Z0-9_-]+$/.test(device))
   throw new Error('Pass an ares device profile: pnpm run deploy --device tv');
 const manifest = JSON.parse(await fs.readFile(path.join(root, 'appinfo.json'), 'utf8'));
+const wallpaper = JSON.parse(
+  await fs.readFile(path.join(root, 'extras/wallpaper/app/appinfo.json'), 'utf8'),
+);
 for (const [tool, args] of [
+  [
+    'ares-install',
+    ['--device', device, path.join(root, 'dist', `${wallpaper.id}_${wallpaper.version}_all.ipk`)],
+  ],
   [
     'ares-install',
     ['--device', device, path.join(root, 'dist', `${manifest.id}_${manifest.version}_arm.ipk`)],

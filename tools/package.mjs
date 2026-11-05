@@ -161,3 +161,4 @@ await fs.writeFile(path.join(dist, 'sha256sums'), `${hash}  ${filename}\n`);
 console.log(`Ready to install: dist/${filename}\nSHA-256: ${hash}`);
 // Companion webOS web app is distributed as a separate IPK.
 await import('./package-player.mjs');
+await import('./package-wallpaper.mjs');

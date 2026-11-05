@@ -32,6 +32,7 @@ pub fn redirect_to_home() -> Result<bool, String> {
 }
 
 pub enum Request {
+    Wallpaper(Value),
     Refresh,
     Launch(String),
     MoonlightLaunch(crate::moonlight::MoonlightLink, i64),
@@ -46,6 +47,7 @@ pub enum Request {
     Signals,
 }
 pub enum Response {
+    WallpaperLaunched(Result<(), String>),
     Inventory(Result<(Inventory, Option<String>), String>),
     Launched(Result<(), String>),
     /// `None` when Homebrew Channel has no root: Luma runs as a plain app.
@@ -81,6 +83,15 @@ impl Platform {
         thread::spawn(move || {
             while let Ok(request) = requests.recv() {
                 let response = match request {
+                    Request::Wallpaper(params) => Response::WallpaperLaunched(if webos {
+                        call(
+                            "luna://com.webos.applicationManager/launch",
+                            json!({"id": crate::native_wallpaper::APP_ID, "params": params}),
+                        )
+                        .map(|_| ())
+                    } else {
+                        Ok(())
+                    }),
                     Request::Refresh => Response::Inventory(if webos {
                         inventory()
                     } else {

@@ -6,7 +6,7 @@
   "sortPackageJson": false,
   "overrides": [
     {
-      "files": ["tv/*.cjs", "extras/c9/*.js"],
+      "files": ["tv/*.cjs", "extras/c9/*.js", "extras/wallpaper/app/*.js"],
       "options": {
         "trailingComma": "none"
       }
